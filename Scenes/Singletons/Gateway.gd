@@ -10,7 +10,7 @@ var key = load("res://Resources/Certificate/X509_Key.key")
 func _ready():
 	StartServer()
 
-func _process(delta):
+func _process(_delta):
 	if not self.custom_multiplayer.has_network_peer():
 		return
 	self.custom_multiplayer.poll()
@@ -41,4 +41,24 @@ remote func LoginRequest(username, password):
 
 func ReturnLoginRequest(result, player_id, token):
 	rpc_id(player_id, "ReturnLoginRequest", result, token)
+	network.disconnect_peer(player_id)
+
+remote func CreateAccountRequest(username, password):
+	var player_id = custom_multiplayer.get_rpc_sender_id()
+	var valid_request = true
+	if username == "":
+		valid_request = false
+	if password == "":
+		valid_request = false
+	if password.length() <= 6:
+		valid_request = false
+	
+	if not valid_request:
+		ReturnCreateAccountRequest(valid_request, player_id, 1)
+	else:
+		Authenticate.CreateAccount(username.to_lower(), password, player_id)
+		
+func ReturnCreateAccountRequest(result, player_id, message):
+	rpc_id(player_id, "ReturnCreateAccountRequest", result, message)
+	# 1 = failed to create, 2 = existing username, 3 = welcome
 	network.disconnect_peer(player_id)
