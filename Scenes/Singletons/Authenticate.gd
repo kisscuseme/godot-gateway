@@ -1,8 +1,10 @@
 extends Node
 
 var network = NetworkedMultiplayerENet.new()
-var ip = "192.168.0.19"
-var port = 1911
+var ip = GlobalData.server_info["AUTHENTICATE"]["IP"]
+var port = GlobalData.server_info["AUTHENTICATE"]["PORT"]
+
+onready var gateway = get_node("/root/Gateway")
 
 func _ready():
 	ConnectToServer()
@@ -26,7 +28,7 @@ func AuthenticatePlayer(username, password, player_id):
 
 remote func AuthenticationResults(result, player_id, token):
 	print("results received and replying to player login request")
-	Gateway.ReturnLoginRequest(result, player_id, token)
+	gateway.ReturnLoginRequest(result, player_id, token)
 
 func CreateAccount(username, password, player_id):
 	print("sending out create account request")
@@ -34,4 +36,4 @@ func CreateAccount(username, password, player_id):
 
 remote func CreateAccountResults(result, player_id, message):
 	print("results received and replying to player create account request")
-	Gateway.ReturnCreateAccountRequest(result, player_id, message)
+	gateway.ReturnCreateAccountRequest(result, player_id, message)
